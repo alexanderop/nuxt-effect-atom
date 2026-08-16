@@ -43,7 +43,7 @@
     "prepack": "nuxt-module-build build",
     "dev": "pnpm dev:prepare && nuxt dev playground",
     "dev:build": "nuxt build playground",
-    "dev:prepare": "nuxt-module-build build && nuxt-module-build prepare && nuxt prepare playground",
+    "dev:prepare": "nuxt-module-build prepare && nuxt-module-build build && nuxt prepare playground",
     "lint": "eslint .",
     "test": "pnpm prepack && vitest run tests/runtime.test.ts && vitest run tests/integration.test.ts",
     "test:unit": "pnpm prepack && vitest run tests/runtime.test.ts",
