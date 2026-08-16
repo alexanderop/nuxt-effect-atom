@@ -1,0 +1,16 @@
+{
+  "private": true,
+  "name": "nuxt-effect-atom-playground",
+  "type": "module",
+  "scripts": {
+    "dev": "nuxt dev",
+    "build": "nuxt build",
+    "preview": "nuxt preview"
+  },
+  "dependencies": {
+    "@effect/atom-vue": "4.0.0-rc.109",
+    "effect": "4.0.0-rc.109",
+    "nuxt": "^4.5.2",
+    "nuxt-effect-atom": "workspace:*"
+  }
+}
