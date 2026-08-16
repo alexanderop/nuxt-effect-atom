@@ -54,8 +54,6 @@ export default defineNuxtPlugin({
     const registry = ownsRegistry ? AtomRegistry.make(options.registry) : defaultRegistry;
     const abortController = new AbortController();
     const context = requestContext(nuxtApp, abortController);
-    const abortRequest = () => abortController.abort("request aborted");
-    context.event?.node.req.once("aborted", abortRequest);
     const unsubscribeEvents = subscribeEffectAtomEvents((event) => {
       if (event.type === "layer:acquired" || event.type === "layer:disposed") {
         void nuxtApp.callHook("effect-atom:event", event);
@@ -73,7 +71,7 @@ export default defineNuxtPlugin({
       recordRegistryCreated();
     }
     let disposed = false;
-    const dispose = () => {
+    function dispose() {
       if (disposed) return;
       disposed = true;
       abortController.abort("registry disposed");
@@ -83,7 +81,12 @@ export default defineNuxtPlugin({
       registry.dispose();
       if (options.diagnostics) recordRegistryDisposed();
       void nuxtApp.callHook("effect-atom:registry:disposed");
-    };
+    }
+    function abortRequest() {
+      abortController.abort("request aborted");
+      dispose();
+    }
+    context.event?.node.req.once("aborted", abortRequest);
     if (import.meta.server) {
       nuxtApp.hook("app:error", dispose);
       nuxtApp.hook("app:rendered", async () => {

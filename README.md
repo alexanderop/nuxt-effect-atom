@@ -45,6 +45,8 @@ export const runtime = processAtomRuntime(DatabaseLive)
 
 The process factory accepts only `Layer<R, E, never>`. A layer still requiring `AtomRegistry`, `Reactivity`, or request services cannot accidentally capture the first SSR request. On the browser, both factories naturally live for the client registry.
 
+“Process” means one warm Nitro application instance, not one global deployment. Serverless and edge platforms may run many isolated instances, recycle them without a graceful close, or create a new instance for each request. Use this lifetime for reusable connections and infrastructure, never for durable coordination or cross-instance state.
+
 `atomRuntime` remains as a deprecated migration bridge. Ambiguous legacy layers now stay request-scoped even when `sharedMemoMap` is enabled.
 
 ## SSR suspense
