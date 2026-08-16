@@ -114,4 +114,7 @@ src/runtime/composables/useAtomSuspense.ts     SSR-aware read
 playground/app/atoms/notes.ts                  the atoms
 playground/shared/notes/                       domain, service, layers, fake db
 scripts/measure.mjs                            the table above
+dist/                                          committed — see .gitignore
 ```
+
+`dist/` is checked in so `pnpm add github:…` works without the consumer allowlisting a build script. Run `pnpm prepack` before pushing any change under `src/`.
