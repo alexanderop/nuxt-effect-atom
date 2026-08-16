@@ -27,6 +27,7 @@
   ],
   "scripts": {
     "prepack": "nuxt-module-build build",
+    "prepare": "nuxt-module-build build",
     "dev": "pnpm dev:prepare && nuxt dev playground",
     "dev:build": "nuxt build playground",
     "dev:prepare": "nuxt-module-build build --stub && nuxt-module-build prepare && nuxt prepare playground",

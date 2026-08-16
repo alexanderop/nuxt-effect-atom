@@ -4,10 +4,37 @@ A spike, not a release. The question it exists to answer: **is a Nuxt module for
 
 The method: write the SSR glue by hand in `playground/`, get it working, then extract it into `src/runtime/` — and measure each extracted piece by switching it back off. Every scenario below runs the *same* application code. Only the module's behaviour changes.
 
+## Try it
+
+Not on npm — deliberately, see [Verdict](#verdict). Install from git:
+
+```bash
+pnpm add github:alexanderop/nuxt-effect-atom
+```
+
+```ts
+// nuxt.config.ts
+export default defineNuxtConfig({
+  modules: ['nuxt-effect-atom'],
+})
+```
+
+Requires `effect` and `@effect/atom-vue` at exactly `4.0.0-rc.109` as peers. The pin is not caution — the v4 RC line moves fast enough that a range would be a lie.
+
+Then in a component:
+
+```vue
+<script setup lang="ts">
+const notes = await useAtomSuspense(() => notesAtom('alice'))
+</script>
+```
+
+Or work on the spike itself:
+
 ```bash
 pnpm install
-pnpm dev                 # playground on :3000
-node scripts/measure.mjs # the table below
+pnpm dev      # playground on :3000
+pnpm measure  # the table below
 ```
 
 ## What was measured
