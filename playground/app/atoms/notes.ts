@@ -1,14 +1,13 @@
-import { AsyncResult, Atom, atomRuntime } from '#effect-atom'
-import { Effect, Schema } from 'effect'
+import { AsyncResult, Atom, effectAtomSerializable, processAtomRuntime, requestAtomRuntime } from '#effect-atom'
+import { Effect, Layer, Schema } from 'effect'
 import { Notes, sortNotes } from '#shared/notes/domain'
 import { NotesError, NotesRepo, NotesRepoLive } from '#shared/notes/repo'
 
 /**
- * `atomRuntime` instead of `Atom.runtime`: on the server this factory is backed
- * by one process-wide `Layer.MemoMap`, so `NotesRepoServer` — and the pool it
- * acquires — is built once for the process instead of once per request.
+ * `processAtomRuntime` makes ownership explicit: on the server `NotesRepoServer`
+ * and its pool are acquired once for this Nuxt process and released at close.
  */
-export const runtime = atomRuntime(NotesRepoLive)
+export const runtime = processAtomRuntime(NotesRepoLive)
 
 /**
  * Who this request is for. Every real app has an atom like this — session,
@@ -20,7 +19,7 @@ export const runtime = atomRuntime(NotesRepoLive)
  */
 export const currentUserAtom = Atom.make('anonymous').pipe(
   Atom.keepAlive,
-  Atom.serializable({ key: 'current-user', schema: Schema.String }),
+  effectAtomSerializable({ key: 'current-user', schema: Schema.String }),
 )
 
 const notesResult = AsyncResult.Schema({
@@ -42,10 +41,10 @@ export const notesAtom = Atom.family((author: string) =>
       }),
     )
     .pipe(
-      Atom.serializable({ key: `notes:${author}`, schema: notesResult }),
+      effectAtomSerializable({ key: `notes:${author}`, schema: notesResult }),
       // Keep serializable before withReactivity so the module can recognize a
       // hydrated value and defer the source subscription until invalidation.
-      atomRuntime.withReactivity(['notes']),
+      processAtomRuntime.withReactivity(['notes']),
     ),
 )
 
@@ -56,4 +55,18 @@ export const addNoteAtom = runtime.fn(
       return yield* repo.add(input)
     }),
   { reactivityKeys: ['notes'] },
+)
+
+export const routePayloadStats = { clientReads: 0 }
+
+export const routePayloadAtom = requestAtomRuntime(Layer.empty).atom(
+  Effect.sync(() => {
+    if (import.meta.client) routePayloadStats.clientReads++
+    return 'from extracted payload'
+  }),
+).pipe(
+  effectAtomSerializable({
+    key: 'route-payload',
+    schema: AsyncResult.Schema({ success: Schema.String, error: Schema.Never }),
+  }),
 )

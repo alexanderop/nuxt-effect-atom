@@ -1,14 +1,10 @@
+/** Safe default for application, request, session, and browser-owned services. */
+export declare const requestAtomRuntime: import("effect/unstable/reactivity/Atom").RuntimeFactory;
+/** Explicit process owner for fully provided pools, tracers, and infrastructure. */
+export declare const processAtomRuntime: import("./public.js").ProcessAtomRuntimeFactory;
 /**
- * Drop-in replacement for `Atom.runtime` that is safe under SSR.
- *
- * `Atom.runtime` memoises built layers *per `AtomRegistry`* (see the
- * `eff-523-registry-scoped-atom-runtime` changeset). That is the right default
- * in a SPA, where there is one registry for the life of the tab. On a server
- * where every request gets its own registry it means the layer — connection
- * pool, HTTP client, tracer — is constructed and torn down on every single
- * request.
- *
- * `Atom.context({ memoMap })` with one process-wide `Layer.MemoMap` restores
- * the intended lifetime: registries stay per-request, layers stay per-process.
+ * @deprecated Lifetime inference is ambiguous. Migrate to `requestAtomRuntime`
+ * or `processAtomRuntime`.
  */
 export declare const atomRuntime: import("effect/unstable/reactivity/Atom").RuntimeFactory;
+export declare const effectAtomSerializable: <R extends import("effect/unstable/reactivity/Atom").Atom<unknown>, S extends import("effect/Schema").ConstraintCodec<import("effect/unstable/reactivity/Atom").Type<R>, unknown>>(options: import("./serialization.js").EffectAtomSerializableOptions<S>) => (source: R) => R & import("effect/unstable/reactivity/Atom").Serializable<S> & import("./serialization.js").HydrationPolicyAtom<R>;

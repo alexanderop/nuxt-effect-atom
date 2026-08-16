@@ -1,20 +1,33 @@
-import { options } from '#effect-atom/options'
-import { createAtomRuntime } from './public'
+import { options, runtimeKey } from '#effect-atom/options'
+import {
+  createAtomRuntime,
+  createProcessAtomRuntime,
+  createRequestAtomRuntime,
+} from './public'
+import { createEffectAtomSerializable } from './serialization'
+
+const runtimeOptions = {
+  hydrationSafeReactivity: options.hydrate,
+  hydrationStaleTime: options.hydrationStaleTime,
+}
+
+/** Safe default for application, request, session, and browser-owned services. */
+export const requestAtomRuntime = createRequestAtomRuntime(runtimeOptions)
+
+/** Explicit process owner for fully provided pools, tracers, and infrastructure. */
+export const processAtomRuntime = createProcessAtomRuntime({
+  ...runtimeOptions,
+  runtimeKey,
+})
 
 /**
- * Drop-in replacement for `Atom.runtime` that is safe under SSR.
- *
- * `Atom.runtime` memoises built layers *per `AtomRegistry`* (see the
- * `eff-523-registry-scoped-atom-runtime` changeset). That is the right default
- * in a SPA, where there is one registry for the life of the tab. On a server
- * where every request gets its own registry it means the layer — connection
- * pool, HTTP client, tracer — is constructed and torn down on every single
- * request.
- *
- * `Atom.context({ memoMap })` with one process-wide `Layer.MemoMap` restores
- * the intended lifetime: registries stay per-request, layers stay per-process.
+ * @deprecated Lifetime inference is ambiguous. Migrate to `requestAtomRuntime`
+ * or `processAtomRuntime`.
  */
 export const atomRuntime = createAtomRuntime({
+  ...runtimeOptions,
   sharedMemoMap: options.sharedMemoMap,
-  hydrationSafeReactivity: options.hydrate,
+  runtimeKey,
 })
+
+export const effectAtomSerializable = createEffectAtomSerializable(options.duplicateKeyPolicy)

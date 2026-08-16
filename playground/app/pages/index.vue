@@ -88,6 +88,10 @@ async function submit() {
         status
       </NuxtLink>
       |
+      <NuxtLink to="/route-payload">
+        route payload
+      </NuxtLink>
+      |
       <NuxtLink to="/?author=alice">
         alice
       </NuxtLink>

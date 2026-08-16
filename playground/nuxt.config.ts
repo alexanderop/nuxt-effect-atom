@@ -6,11 +6,14 @@ const off = (name: string) => process.env.NAIVE === '1' || process.env[name] ===
 export default defineNuxtConfig({
   modules: ['nuxt-effect-atom'],
   devtools: { enabled: false },
+  routeRules: {
+    '/route-payload': { prerender: true },
+  },
+  experimental: { payloadExtraction: true },
   compatibilityDate: 'latest',
   effectAtom: {
     perRequestRegistry: !off('EA_REGISTRY'),
     hydrate: !off('EA_HYDRATE'),
-    sharedMemoMap: !off('EA_MEMOMAP'),
     ssrSuspense: !off('EA_SUSPENSE'),
   },
 })

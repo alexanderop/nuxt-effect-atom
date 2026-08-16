@@ -52,7 +52,9 @@
     "measure": "node scripts/measure.mjs"
   },
   "dependencies": {
-    "@nuxt/kit": "^4.5.2"
+    "@nuxt/devtools-kit": "^3.4.1",
+    "@nuxt/kit": "^4.5.2",
+    "h3": "^1.15.4"
   },
   "peerDependencies": {
     "@effect/atom-vue": "4.0.0-rc.109",

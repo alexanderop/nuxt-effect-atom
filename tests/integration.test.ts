@@ -46,4 +46,21 @@ describe('Nuxt integration', () => {
 
     await page.close()
   }, 15_000)
+
+  it('resolves one suspense atom and bounds a never-settling atom', async () => {
+    const page = await createPage('/suspense')
+    await playwrightExpect(page.getByTestId('factory-count')).toHaveText('1')
+    await playwrightExpect(page.getByTestId('settled')).toHaveText('settled')
+    await playwrightExpect(page.getByTestId('timeout')).toHaveText('loading')
+    await page.close()
+  })
+
+  it('hydrates extracted route payloads before client page setup', async () => {
+    const page = await createPage('/?author=alice')
+    await page.getByRole('link', { name: 'route payload' }).click()
+    await page.waitForURL('**/route-payload')
+    await playwrightExpect(page.getByTestId('route-payload-value')).toHaveText('from extracted payload')
+    await playwrightExpect(page.getByTestId('route-payload-client-reads')).toHaveText('0')
+    await page.close()
+  })
 })
