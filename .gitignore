@@ -1,47 +1,60 @@
+# Dependencies
+node_modules
 
-!.vscode/*.code-snippets
-!.vscode/extensions.json
-!.vscode/launch.json
-!.vscode/settings.json
-!.vscode/tasks.json
-.apdisk
-.AppleDB
-.AppleDesktop
-.AppleDouble
-.build-*
-.cache
-.data
-.DS_Store
-.env
-.idea
-.LSOverride
-.netlify
-.nuxt
-.nyc_output
-.output
+# Logs
+*.log*
+
+# Temp directories
 .temp
 .tmp
-.vercel_build_output
-.vscode/*
-*.iml
-*.lcov
-*.log*
-**/.yarn/*state*
-**/.yarn/cache
-# Dependencies
-# Env
-# Generated dirs
-# Intellij idea
-# Logs
-# Nuxt
-# OSX
-# Temp directories
-# Testing
-# VSCode
-# Yarn
-coverage
-dist
-Network Trash Folder
-node_modules
-reports
+.cache
 Temporary Items
+
+# Yarn
+**/.yarn/cache
+**/.yarn/*state*
+
+# Generated dirs
+.output
+
+# Nuxt
+.nuxt
+.data
+.vercel_build_output
+.build-*
+.netlify
+
+# Env
+.env
+
+# Testing
+reports
+coverage
+*.lcov
+
+# VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/tasks.json
+!.vscode/*.code-snippets
+
+# Intellij idea
+*.iml
+.idea
+
+# OSX
+.DS_Store
+.AppleDouble
+.LSOverride
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+.apdisk
+.nyc_output
+
+# dist/ is committed on purpose: this package is installed from git, and
+# pnpm 10 refuses to run a git dependency's `prepare` script unless the
+# consumer allowlists it in onlyBuiltDependencies. Shipping the build
+# removes that step. Rebuild with `pnpm prepack` before pushing src changes.

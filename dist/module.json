@@ -1,0 +1,12 @@
+{
+  "name": "nuxt-effect-atom",
+  "configKey": "effectAtom",
+  "compatibility": {
+    "nuxt": ">=4.0.0"
+  },
+  "version": "0.0.1",
+  "builder": {
+    "@nuxt/module-builder": "1.0.3",
+    "unbuild": "unknown"
+  }
+}
