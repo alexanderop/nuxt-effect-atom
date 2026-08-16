@@ -2,7 +2,10 @@
   "name": "nuxt-effect-atom",
   "version": "0.0.1",
   "description": "Effect Atom for Nuxt: per-request registry, SSR hydration, and a process-shared layer memo map",
-  "repository": "alexanderopalic/nuxt-effect-atom",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alexanderop/nuxt-effect-atom.git"
+  },
   "license": "MIT",
   "type": "module",
   "exports": {
@@ -28,7 +31,7 @@
     "dev:build": "nuxt build playground",
     "dev:prepare": "nuxt-module-build build --stub && nuxt-module-build prepare && nuxt prepare playground",
     "lint": "eslint .",
-    "test:types": "vue-tsc --noEmit",
+    "test:types": "vue-tsc --noEmit && cd playground && vue-tsc --noEmit",
     "measure": "node scripts/measure.mjs"
   },
   "dependencies": {
@@ -60,5 +63,20 @@
       "unrs-resolver",
       "msgpackr-extract"
     ]
-  }
+  },
+  "bugs": {
+    "url": "https://github.com/alexanderop/nuxt-effect-atom/issues"
+  },
+  "homepage": "https://github.com/alexanderop/nuxt-effect-atom#readme",
+  "author": "Alexander Opalic",
+  "keywords": [
+    "nuxt",
+    "nuxt-module",
+    "effect",
+    "effect-ts",
+    "effect-atom",
+    "ssr",
+    "vue"
+  ],
+  "packageManager": "pnpm@10.28.2"
 }

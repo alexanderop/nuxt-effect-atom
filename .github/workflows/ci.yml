@@ -8,42 +8,41 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  lint:
+  check:
+    name: lint, typecheck, build
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
-      - uses: actions/setup-node@v7
+      - run: corepack enable
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24.19.0
-
-      - run: npm i -g --force corepack@latest && corepack enable
+          cache: pnpm
 
       - name: Install dependencies
-        run: npx nypm@latest i
+        run: pnpm install --frozen-lockfile
 
       - name: Lint
-        run: npm run lint
+        run: pnpm lint
 
-  test:
-    runs-on: ubuntu-latest
+      - name: Prepare module and playground
+        run: pnpm dev:prepare
 
-    steps:
-      - uses: actions/checkout@v7
+      - name: Typecheck
+        run: pnpm test:types
 
-      - uses: actions/setup-node@v7
-        with:
-          node-version: 24.19.0
-
-      - run: npm i -g --force corepack@latest && corepack enable
-
-      - name: Install dependencies
-        run: npx nypm@latest i
-
-      - name: Playground prepare
-        run: npm run dev:prepare
-
-      - name: Test
-        run: npm run test
+      - name: Build playground
+        run: pnpm dev:build
