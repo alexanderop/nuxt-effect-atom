@@ -21,6 +21,9 @@ node scripts/measure.mjs # the table below
 | no per-request registry | ✓ | ✗ | 4 | 0 |
 | no SSR suspense | ✗ `loading…` | ✗ | 0 | 5 |
 | no shared MemoMap | ✓ | ✓ | 0 | 20 |
+| registry only | ✓ | ✗ | 0 | 20 |
+
+The last row is the important one for anyone deciding whether they need a module at all: **a per-request registry on its own is enough to be leak-free.** It costs you the payload (the client refetches what the server rendered) and a layer build per request, but nothing is shared between users.
 
 Production build (`node playground/.output/server/index.mjs`): **1 layer build across 21 requests**, data in the HTML, atom in the payload.
 

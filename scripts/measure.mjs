@@ -17,6 +17,9 @@ const scenarios = [
   { name: 'no per-request registry', env: { EA_REGISTRY: '0' } },
   { name: 'no SSR suspense', env: { EA_SUSPENSE: '0' } },
   { name: 'no shared MemoMap', env: { EA_MEMOMAP: '0' } },
+  // The minimum a hand-rolled app needs: a registry per request and nothing
+  // else. Does correctness survive on its own?
+  { name: 'registry only', env: { EA_HYDRATE: '0', EA_MEMOMAP: '0' } },
 ]
 
 const sleep = ms => new Promise(r => setTimeout(r, ms))
