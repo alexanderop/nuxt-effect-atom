@@ -26,6 +26,10 @@ interface ModuleOptions {
     ssrSuspense: boolean;
     /** Auto-import the `useAtom*` family and `atomRuntime`. */
     autoImports: boolean;
+    /** Collect lifecycle, hydration, payload-size, and layer diagnostics. */
+    diagnostics: boolean;
+    /** Warn in development when serializable atoms are embedded in HTML. */
+    warnOnPayload: boolean;
 }
 declare const _default: _nuxt_schema.NuxtModule<ModuleOptions, ModuleOptions, false>;
 

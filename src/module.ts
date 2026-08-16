@@ -1,4 +1,4 @@
-import { addImports, addPlugin, addTemplate, addTypeTemplate, createResolver, defineNuxtModule } from '@nuxt/kit'
+import { addImports, addPlugin, addServerPlugin, addTemplate, addTypeTemplate, createResolver, defineNuxtModule } from '@nuxt/kit'
 
 export interface ModuleOptions {
   /**
@@ -26,6 +26,10 @@ export interface ModuleOptions {
   ssrSuspense: boolean
   /** Auto-import the `useAtom*` family and `atomRuntime`. */
   autoImports: boolean
+  /** Collect lifecycle, hydration, payload-size, and layer diagnostics. */
+  diagnostics: boolean
+  /** Warn in development when serializable atoms are embedded in HTML. */
+  warnOnPayload: boolean
 }
 
 export default defineNuxtModule<ModuleOptions>({
@@ -40,6 +44,8 @@ export default defineNuxtModule<ModuleOptions>({
     sharedMemoMap: true,
     ssrSuspense: true,
     autoImports: true,
+    diagnostics: true,
+    warnOnPayload: true,
   },
   setup(options, nuxt) {
     const resolver = createResolver(import.meta.url)
@@ -69,6 +75,7 @@ export default defineNuxtModule<ModuleOptions>({
     nuxt.options.nitro.externals.inline.push('effect', '@effect/atom-vue')
 
     addPlugin({ src: resolver.resolve('./runtime/plugin'), mode: 'all' })
+    addServerPlugin(resolver.resolve('./runtime/server/nitro-plugin'))
 
     if (options.autoImports) {
       addImports([

@@ -17,7 +17,7 @@ concurrency:
 
 jobs:
   check:
-    name: lint, typecheck, build
+    name: lint, typecheck, test, build
     runs-on: ubuntu-latest
 
     steps:
@@ -43,6 +43,12 @@ jobs:
 
       - name: Typecheck
         run: pnpm test:types
+
+      - name: Install Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Test
+        run: pnpm test
 
       - name: Build playground
         run: pnpm dev:build

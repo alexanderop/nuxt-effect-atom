@@ -7,7 +7,6 @@ const route = useRoute()
 const author = String(route.query.author ?? 'alice')
 
 const registry = useAtomRegistry()
-registry.set(currentUserAtom, author)
 
 // The one line the module exists for. `useAtomValue` here would render the
 // loading branch on the server; this awaits the atom before the HTML is built.
@@ -25,11 +24,14 @@ onMounted(() => {
   clientLists.value = clientStats.lists
 })
 
+watch(notes, () => {
+  clientLists.value = clientStats.lists
+})
+
 async function submit() {
   if (!text.value.trim()) return
   await addNote({ author, text: text.value })
   text.value = ''
-  registry.refresh(notesAtom(author))
   clientLists.value = clientStats.lists
 }
 </script>
@@ -82,6 +84,10 @@ async function submit() {
     </form>
 
     <nav>
+      <NuxtLink to="/status">
+        status
+      </NuxtLink>
+      |
       <NuxtLink to="/?author=alice">
         alice
       </NuxtLink>

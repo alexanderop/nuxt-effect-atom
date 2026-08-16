@@ -1,4 +1,5 @@
 import { AtomRegistry } from '@effect/atom-vue';
+import { type EffectAtomDiagnostics } from './diagnostics.js';
 /**
  * Two jobs, both of which every SSR Effect Atom app needs and none of which
  * `@effect/atom-vue` does for you today:
@@ -15,7 +16,15 @@ import { AtomRegistry } from '@effect/atom-vue';
 declare const _default: import("#app").Plugin<Record<string, unknown>> & import("#app").ObjectPlugin<Record<string, unknown>>;
 export default _default;
 declare module '#app' {
+    interface RuntimeNuxtHooks {
+        'effect-atom:setup': (context: {
+            readonly nuxtApp: NuxtApp;
+            readonly registry: AtomRegistry.AtomRegistry;
+            readonly ssrContext: NuxtApp['ssrContext'];
+        }) => void | Promise<void>;
+    }
     interface NuxtApp {
         $effectAtomRegistry: AtomRegistry.AtomRegistry;
+        readonly $effectAtomDiagnostics: Readonly<EffectAtomDiagnostics>;
     }
 }

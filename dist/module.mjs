@@ -1,4 +1,4 @@
-import { defineNuxtModule, createResolver, addTemplate, addTypeTemplate, addPlugin, addImports } from '@nuxt/kit';
+import { defineNuxtModule, createResolver, addTemplate, addTypeTemplate, addPlugin, addServerPlugin, addImports } from '@nuxt/kit';
 
 const module$1 = defineNuxtModule({
   meta: {
@@ -11,7 +11,9 @@ const module$1 = defineNuxtModule({
     hydrate: true,
     sharedMemoMap: true,
     ssrSuspense: true,
-    autoImports: true
+    autoImports: true,
+    diagnostics: true,
+    warnOnPayload: true
   },
   setup(options, nuxt) {
     const resolver = createResolver(import.meta.url);
@@ -34,6 +36,7 @@ const module$1 = defineNuxtModule({
     nuxt.options.nitro.externals.inline ||= [];
     nuxt.options.nitro.externals.inline.push("effect", "@effect/atom-vue");
     addPlugin({ src: resolver.resolve("./runtime/plugin"), mode: "all" });
+    addServerPlugin(resolver.resolve("./runtime/server/nitro-plugin"));
     if (options.autoImports) {
       addImports([
         { name: "atomRuntime", from: resolver.resolve("./runtime/runtime") },

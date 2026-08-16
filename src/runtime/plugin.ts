@@ -1,7 +1,18 @@
-import { AtomRegistry, registryKey } from '@effect/atom-vue'
+import { AtomRegistry, defaultRegistry, registryKey } from '@effect/atom-vue'
 import * as Hydration from 'effect/unstable/reactivity/Hydration'
 import { defineNuxtPlugin } from '#app'
 import { options } from '#effect-atom/options'
+import {
+  exposeEffectAtomDiagnostics,
+  getEffectAtomDiagnostics,
+  recordDehydration,
+  recordRegistryCreated,
+  recordRegistryDisposed,
+  rememberHydration,
+  type EffectAtomDiagnostics,
+} from './diagnostics'
+
+let payloadWarningShown = false
 
 /**
  * Two jobs, both of which every SSR Effect Atom app needs and none of which
@@ -19,38 +30,97 @@ import { options } from '#effect-atom/options'
 export default defineNuxtPlugin({
   name: 'nuxt-effect-atom',
   enforce: 'pre',
-  setup(nuxtApp) {
-    if (!options.perRequestRegistry) return
-
-    const registry = AtomRegistry.make()
+  async setup(nuxtApp) {
+    const ownsRegistry = options.perRequestRegistry
+    const registry = ownsRegistry ? AtomRegistry.make() : defaultRegistry
+    if (ownsRegistry && options.diagnostics) recordRegistryCreated()
     nuxtApp.vueApp.provide(registryKey, registry)
     nuxtApp.$effectAtomRegistry = registry
+    Object.defineProperty(nuxtApp, '$effectAtomDiagnostics', {
+      configurable: true,
+      get: getEffectAtomDiagnostics,
+    })
 
-    if (!options.hydrate) return
+    let disposed = false
+    const dispose = () => {
+      if (!ownsRegistry || disposed) return
+      disposed = true
+      registry.dispose()
+      if (options.diagnostics) recordRegistryDisposed()
+    }
 
     if (import.meta.server) {
+      nuxtApp.hook('app:error', dispose)
       nuxtApp.hook('app:rendered', () => {
-        // Values are already encoded to JSON by each atom's serializable
-        // schema, so the payload needs no custom reducer.
-        nuxtApp.payload.effectAtom = Hydration.dehydrate(registry)
+        try {
+          if (!options.hydrate) return
+          const state = Hydration.dehydrate(registry)
+          nuxtApp.payload.effectAtom = state
+          if (options.diagnostics) recordDehydration(state)
+          if (import.meta.dev && options.diagnostics) {
+            const diagnostics = getEffectAtomDiagnostics()
+            console.debug('[nuxt-effect-atom] SSR diagnostics', {
+              atoms: state.length,
+              payloadBytes: diagnostics.payloadBytes,
+              duplicateSerializationKeys: diagnostics.duplicateSerializationKeys,
+              registriesCreated: diagnostics.registriesCreated,
+              registriesDisposed: diagnostics.registriesDisposed,
+              processLayerBuilds: diagnostics.processLayerBuilds,
+            })
+          }
+          if (import.meta.dev && options.warnOnPayload && state.length > 0 && !payloadWarningShown) {
+            payloadWarningShown = true
+            console.warn(
+              '[nuxt-effect-atom] Serializable atom values are embedded in the Nuxt payload and SSR HTML. Never serialize credentials, tokens, or other secrets.',
+            )
+          }
+        }
+        finally {
+          dispose()
+        }
       })
     }
     else {
+      nuxtApp.vueApp.onUnmount(dispose)
+    }
+
+    await nuxtApp.callHook('effect-atom:setup', {
+      nuxtApp,
+      registry,
+      ssrContext: nuxtApp.ssrContext,
+    })
+
+    if (!options.hydrate) return
+
+    if (import.meta.client) {
       const state = nuxtApp.payload.effectAtom as
         | ReadonlyArray<Hydration.DehydratedAtom>
         | undefined
-      // Dev-only diagnostic: lets a browser check assert that hydration ran
-      // and how many atoms crossed the boundary.
-      if (import.meta.dev) {
-        ;(globalThis as Record<string, unknown>).__effectAtomHydrated = state?.length ?? 0
+      if (state?.length) {
+        rememberHydration(registry, state)
+        Hydration.hydrate(registry, state)
       }
-      if (state?.length) Hydration.hydrate(registry, state)
+      if (options.diagnostics) exposeEffectAtomDiagnostics()
+      if (import.meta.dev && options.diagnostics) {
+        nuxtApp.hook('app:mounted', () => {
+          console.debug('[nuxt-effect-atom] Client diagnostics', getEffectAtomDiagnostics())
+        })
+      }
     }
   },
 })
 
 declare module '#app' {
+  interface RuntimeNuxtHooks {
+    'effect-atom:setup': (context: {
+      readonly nuxtApp: NuxtApp
+      readonly registry: AtomRegistry.AtomRegistry
+      readonly ssrContext: NuxtApp['ssrContext']
+    }) => void | Promise<void>
+  }
+
   interface NuxtApp {
     $effectAtomRegistry: AtomRegistry.AtomRegistry
+    readonly $effectAtomDiagnostics: Readonly<EffectAtomDiagnostics>
   }
 }

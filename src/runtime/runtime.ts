@@ -1,6 +1,5 @@
-import { Atom } from '@effect/atom-vue'
-import { Layer } from 'effect'
 import { options } from '#effect-atom/options'
+import { createAtomRuntime } from './public'
 
 /**
  * Drop-in replacement for `Atom.runtime` that is safe under SSR.
@@ -15,10 +14,7 @@ import { options } from '#effect-atom/options'
  * `Atom.context({ memoMap })` with one process-wide `Layer.MemoMap` restores
  * the intended lifetime: registries stay per-request, layers stay per-process.
  */
-const serverMemoMap = import.meta.server && options.sharedMemoMap
-  ? Layer.makeMemoMapUnsafe()
-  : undefined
-
-export const atomRuntime: Atom.RuntimeFactory = serverMemoMap
-  ? Atom.context({ memoMap: serverMemoMap })
-  : Atom.runtime
+export const atomRuntime = createAtomRuntime({
+  sharedMemoMap: options.sharedMemoMap,
+  hydrationSafeReactivity: options.hydrate,
+})

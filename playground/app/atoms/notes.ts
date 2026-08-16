@@ -1,5 +1,5 @@
 import { AsyncResult, Atom, atomRuntime } from '#effect-atom'
-import { Effect } from 'effect'
+import { Effect, Schema } from 'effect'
 import { Notes, sortNotes } from '#shared/notes/domain'
 import { NotesError, NotesRepo, NotesRepoLive } from '#shared/notes/repo'
 
@@ -18,7 +18,10 @@ export const runtime = atomRuntime(NotesRepoLive)
  * It is the atom that exposes a shared registry: with no per-request provide,
  * concurrent renders write to the same node and the last writer wins.
  */
-export const currentUserAtom = Atom.make('anonymous').pipe(Atom.keepAlive)
+export const currentUserAtom = Atom.make('anonymous').pipe(
+  Atom.keepAlive,
+  Atom.serializable({ key: 'current-user', schema: Schema.String }),
+)
 
 const notesResult = AsyncResult.Schema({
   success: Notes,
@@ -39,14 +42,10 @@ export const notesAtom = Atom.family((author: string) =>
       }),
     )
     .pipe(
-      // NOTE: `atomRuntime.withReactivity(['notes'])` belongs here and is what
-      // you would write in a SPA — but it defeats hydration. The reactivity
-      // subscription invalidates the atom as soon as it is mounted on the
-      // client, which discards the value the server just sent and refetches.
-      // Measured: with it, 1 request to /api/notes on load; without it, 0.
-      // Until that is resolved, invalidate explicitly (see `submit` in
-      // pages/index.vue).
       Atom.serializable({ key: `notes:${author}`, schema: notesResult }),
+      // Keep serializable before withReactivity so the module can recognize a
+      // hydrated value and defer the source subscription until invalidation.
+      atomRuntime.withReactivity(['notes']),
     ),
 )
 
@@ -56,4 +55,5 @@ export const addNoteAtom = runtime.fn(
       const repo = yield* NotesRepo
       return yield* repo.add(input)
     }),
+  { reactivityKeys: ['notes'] },
 )

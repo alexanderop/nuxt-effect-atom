@@ -12,6 +12,14 @@
     ".": {
       "types": "./dist/types.d.mts",
       "import": "./dist/module.mjs"
+    },
+    "./runtime": {
+      "types": "./dist/runtime/public.d.ts",
+      "import": "./dist/runtime/public.js"
+    },
+    "./testing": {
+      "types": "./dist/runtime/testing.d.ts",
+      "import": "./dist/runtime/testing.js"
     }
   },
   "main": "./dist/module.mjs",
@@ -19,6 +27,12 @@
     "*": {
       ".": [
         "./dist/types.d.mts"
+      ],
+      "runtime": [
+        "./dist/runtime/public.d.ts"
+      ],
+      "testing": [
+        "./dist/runtime/testing.d.ts"
       ]
     }
   },
@@ -29,8 +43,11 @@
     "prepack": "nuxt-module-build build",
     "dev": "pnpm dev:prepare && nuxt dev playground",
     "dev:build": "nuxt build playground",
-    "dev:prepare": "nuxt-module-build build --stub && nuxt-module-build prepare && nuxt prepare playground",
+    "dev:prepare": "nuxt-module-build build && nuxt-module-build prepare && nuxt prepare playground",
     "lint": "eslint .",
+    "test": "pnpm prepack && vitest run tests/runtime.test.ts && vitest run tests/integration.test.ts",
+    "test:unit": "pnpm prepack && vitest run tests/runtime.test.ts",
+    "test:integration": "pnpm prepack && vitest run tests/integration.test.ts",
     "test:types": "vue-tsc --noEmit && cd playground && vue-tsc --noEmit",
     "measure": "node scripts/measure.mjs"
   },
@@ -42,6 +59,7 @@
     "effect": "4.0.0-rc.109"
   },
   "devDependencies": {
+    "@playwright/test": "1.62.0",
     "@effect/atom-vue": "4.0.0-rc.109",
     "@nuxt/devtools": "^3.4.1",
     "@nuxt/eslint-config": "^1.17.0",
